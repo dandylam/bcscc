@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主恩教會 Grace Church - 網站與管理後台 Demo</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Admin Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        church: {
+                            blue: '#1E3A8A',
+                            softblue: '#EFF6FF',
+                            gold: '#D4AF37',
+                            goldlight: '#FEF3C7',
+                            golddark: '#B45309',
+                            warmbg: '#FAF8F5',
+                            text: '#334155',
+                            heading: '#0F172A',
+                            sidebar: '#0F172A'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['"Noto Serif TC"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hero-overlay {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 58, 138, 0.7) 100%);
+        }
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #D4AF37 0%, #F59E0B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Custom Scrollbar for Admin */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-church-warmbg text-church-text font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Top Global Switcher Bar (Language & Admin/Public View Mode) -->
+    <div class="bg-slate-900 text-white text-xs py-2 px-4 sticky top-0 z-50 flex flex-wrap justify-between items-center border-b border-slate-800 shadow-sm">
+        <div class="flex items-center gap-3">
+            <span class="inline-flex items-center gap-1.5 bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full border border-amber-500/30 font-medium">
+                <i class="fa-solid fa-flask"></i> <span data-i18n="demoModeTag">DEMO 系統展示中</span>
+            </span>
+            <span class="hidden md:inline text-slate-400" data-i18n="demoWelcome">歡迎體驗主恩教會網站全功能與後台管理系統</span>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <!-- Mode Switcher (Public Site vs Admin Dashboard) -->
+            <div class="bg-slate-800 rounded-lg p-0.5 flex items-center border border-slate-700">
+                <button id="mode-public-btn" onclick="switchViewMode('public')" class="px-3 py-1 rounded-md text-xs font-semibold bg-church-blue text-white shadow-sm transition-all flex items-center gap-1">
+                    <i class="fa-solid fa-globe"></i> <span data-i18n="modePublic">前台官網</span>
+                </button>
+                <button id="mode-admin-btn" onclick="switchViewMode('admin')" class="px-3 py-1 rounded-md text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1">
+                    <i class="fa-solid fa-gauge-high"></i> <span data-i18n="modeAdmin">後台管理系統</span>
+                    <span id="admin-badge" class="bg-red-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold ml-0.5">3</span>
+                </button>
+            </div>
+
+            <!-- Language Switcher -->
+            <button onclick="toggleLanguage()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-md font-medium transition-colors flex items-center gap-1">
+                <i class="fa-solid fa-language text-amber-400"></i>
+                <span id="lang-label">English</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- PUBLIC CHURCH WEBSITE SECTION (前台網站) -->
+    <!-- =================================================================== -->
+    <div id="public-site-container" class="flex-grow flex flex-col">
+        
+        <!-- Public Navigation Header -->
+        <header class="bg-white/95 backdrop-blur-md shadow-sm sticky top-[37px] z-40 transition-all border-b border-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-20">
+                    <!-- Church Logo -->
+                    <a href="#home" class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-church-blue flex items-center justify-center text-white shadow-md">
+                            <i class="fa-solid fa-cross text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="text-xl font-bold font-serif text-church-heading block leading-none" data-i18n="churchName">主恩教會</span>
+                            <span class="text-xs text-amber-600 font-semibold tracking-wider uppercase" data-i18n="churchSubName">Grace Church</span>
+                        </div>
+                    </a>
+
+                    <!-- Nav Links -->
+                    <nav class="hidden lg:flex items-center gap-7 font-medium text-slate-600 text-sm">
+                        <a href="#home" class="hover:text-church-blue transition-colors py-2" data-i18n="navHome">主頁</a>
+                        <a href="#services" class="hover:text-church-blue transition-colors py-2" data-i18n="navServices">主日崇拜</a>
+                        <a href="#giving" class="hover:text-church-blue transition-colors py-2" data-i18n="navGiving">線上奉獻</a>
+                        <a href="#prayer" class="hover:text-church-blue transition-colors py-2" data-i18n="navPrayer">代禱需求</a>
+                        <a href="#news" class="hover:text-church-blue transition-colors py-2" data-i18n="navNews">最新消息</a>
+                        <a href="#groups" class="hover:text-church-blue transition-colors py-2" data-i18n="navGroups">團契小組</a>
+                    </nav>
+
+                    <!-- Nav Actions -->
+                    <div class="hidden sm:flex items-center gap-3">
+                        <button onclick="openPrayerModal()" class="px-4 py-2 text-xs font-semibold text-church-blue bg-church-softblue hover:bg-blue-100 rounded-full transition-all">
+                            <i class="fa-solid fa-hands-praying mr-1"></i><span data-i18n="btnPrayer">提出代禱</span>
+                        </button>
+                        <a href="#giving" class="px-5 py-2.5 text-xs font-bold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-full shadow-md transition-all flex items-center gap-1.5">
+                            <i class="fa-solid fa-heart"></i> <span data-i18n="btnGiveNow">立即奉獻</span>
+                        </a>
+                    </div>
+
+                    <button onclick="toggleMobileNav()" class="lg:hidden p-2 text-slate-600">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Nav -->
+            <div id="mobile-nav" class="hidden lg:hidden bg-white border-b border-slate-100 px-4 py-4 space-y-3">
+                <a href="#home" onclick="toggleMobileNav()" class="block text-slate-700 py-1" data-i18n="navHome">主頁</a>
+                <a href="#services" onclick="toggleMobileNav()" class="block text-slate-700 py-1" data-i18n="navServices">主日崇拜</a>
+                <a href="#giving" onclick="toggleMobileNav()" class="block text-slate-700 py-1" data-i18n="navGiving">線上奉獻</a>
+                <a href="#prayer" onclick="toggleMobileNav()" class="block text-slate-700 py-1" data-i18n="navPrayer">代禱需求</a>
+                <a href="#news" onclick="toggleMobileNav()" class="block text-slate-700 py-1" data-i18n="navNews">最新消息</a>
+                <div class="pt-2 flex flex-col gap-2">
+                    <button onclick="toggleMobileNav(); openPrayerModal();" class="w-full text-center py-2 text-xs font-bold text-church-blue bg-church-softblue rounded-lg" data-i18n="btnPrayer">提出代禱</button>
+                    <a href="#giving" onclick="toggleMobileNav()" class="w-full text-center py-2 text-xs font-bold text-slate-900 bg-amber-400 rounded-lg" data-i18n="btnGiveNow">立即奉獻</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section id="home" class="relative min-h-[560px] flex items-center justify-center bg-slate-900 text-white overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <img src="https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=1920&q=80" 
+                     alt="Sanctuary" 
+                     class="w-full h-full object-cover object-center opacity-40"/>
+                <div class="hero-overlay absolute inset-0"></div>
+            </div>
+
+            <div class="relative z-10 max-w-4xl mx-auto px-4 text-center py-16 space-y-6">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-amber-300 text-xs sm:text-sm border border-white/20">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span data-i18n="heroLiveTag">主日崇拜直播與實體聚會歡迎您</span>
+                </div>
+
+                <h1 class="text-3xl sm:text-5xl font-serif font-bold leading-tight tracking-wide">
+                    <span data-i18n="heroTitle1">遇見基督愛與真理</span><br/>
+                    <span class="gold-gradient-text" data-i18n="heroTitle2">建立溫暖喜樂的屬靈家園</span>
+                </h1>
+
+                <p class="text-sm sm:text-lg text-slate-200 max-w-2xl mx-auto font-light leading-relaxed" data-i18n="heroDesc">
+                    無論您處於生命的何種階段，主恩教會都誠摯歡迎您。邀請您與我們一同敬拜，分享神的愛與盼望。
+                </p>
+
+                <!-- Dynamic Sunday Worship Timer/Countdown Box -->
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-2xl max-w-md mx-auto border border-white/20 text-center">
+                    <p class="text-xs text-amber-300 font-semibold mb-1" data-i18n="heroNextService">距離本週主日崇拜倒數</p>
+                    <div class="flex justify-center gap-4 text-lg sm:text-xl font-bold font-mono">
+                        <div><span id="timer-days">02</span><span class="text-xs font-sans text-slate-300 block font-normal" data-i18n="unitDays">天</span></div>:
+                        <div><span id="timer-hours">14</span><span class="text-xs font-sans text-slate-300 block font-normal" data-i18n="unitHours">時</span></div>:
+                        <div><span id="timer-mins">35</span><span class="text-xs font-sans text-slate-300 block font-normal" data-i18n="unitMins">分</span></div>:
+                        <div><span id="timer-secs">20</span><span class="text-xs font-sans text-slate-300 block font-normal" data-i18n="unitSecs">秒</span></div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                    <a href="#giving" class="w-full sm:w-auto px-7 py-3.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-full shadow-lg transition-all text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-heart"></i> <span data-i18n="btnGiveNow">線上奉獻支持</span>
+                    </a>
+                    <a href="#services" class="w-full sm:w-auto px-7 py-3.5 bg-white/15 hover:bg-white/25 text-white border border-white/30 rounded-full transition-all text-sm flex items-center justify-center gap-2">
+                        <i class="fa-regular fa-clock"></i> <span data-i18n="btnServiceTimes">聚會時間與地點</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Enhanced Multi-Option Online Giving / Tithing Section -->
+        <section id="giving" class="py-16 sm:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+                <span class="text-xs uppercase tracking-widest text-amber-600 font-bold block" data-i18n="givingSub">ONLINE TITHING & OFFERING</span>
+                <h2 class="text-3xl font-serif font-bold text-church-heading" data-i18n="givingTitle">線上奉獻專區</h2>
+                <p class="text-slate-500 text-sm leading-relaxed" data-i18n="givingDesc">
+                    「各人要隨本心所酌定的，不要作難，不要勉強，因為捐得樂意的人是神所喜愛的。」（林後 9:7）
+                </p>
+            </div>
+
+            <!-- Giving Form Interactive Card -->
+            <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden max-w-4xl mx-auto">
+                <div class="p-6 sm:p-10 space-y-8">
+
+                    <!-- Step 1: Select Tithing Category -->
+                    <div class="space-y-3">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500" data-i18n="step1">Step 1：選擇奉獻項目</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <button type="button" onclick="selectCategory(this, '十一奉獻')" class="cat-btn active py-3 px-4 rounded-xl border border-church-blue bg-church-softblue text-church-blue font-bold text-xs sm:text-sm text-center transition-all">
+                                <i class="fa-solid fa-hands-holding-circle block text-lg mb-1"></i>
+                                <span data-i18n="catTithe">十一奉獻</span>
+                            </button>
+                            <button type="button" onclick="selectCategory(this, '建堂基金')" class="cat-btn py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-300 text-slate-600 font-bold text-xs sm:text-sm text-center transition-all">
+                                <i class="fa-solid fa-church block text-lg mb-1"></i>
+                                <span data-i18n="catBuilding">建堂基金</span>
+                            </button>
+                            <button type="button" onclick="selectCategory(this, '宣教宣道')" class="cat-btn py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-300 text-slate-600 font-bold text-xs sm:text-sm text-center transition-all">
+                                <i class="fa-solid fa-earth-americas block text-lg mb-1"></i>
+                                <span data-i18n="catMissions">宣教宣道</span>
+                            </button>
+                            <button type="button" onclick="selectCategory(this, '慈惠救助')" class="cat-btn py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-300 text-slate-600 font-bold text-xs sm:text-sm text-center transition-all">
+                                <i class="fa-solid fa-hand-holding-heart block text-lg mb-1"></i>
+                                <span data-i18n="catMercy">慈惠救助</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Select or Enter Amount -->
+                    <div class="space-y-3">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500" data-i18n="step2">Step 2：選擇或輸入金額 (NT$)</label>
+                        <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                            <button type="button" onclick="selectAmount(500, this)" class="amount-btn py-2.5 rounded-xl border border-slate-200 font-bold text-slate-700 text-sm hover:border-amber-400">NT$ 500</button>
+                            <button type="button" onclick="selectAmount(1000, this)" class="amount-btn active py-2.5 rounded-xl border-2 border-amber-500 bg-amber-50 font-bold text-amber-800 text-sm">NT$ 1,000</button>
+                            <button type="button" onclick="selectAmount(3000, this)" class="amount-btn py-2.5 rounded-xl border border-slate-200 font-bold text-slate-700 text-sm hover:border-amber-400">NT$ 3,000</button>
+                            <button type="button" onclick="selectAmount(5000, this)" class="amount-btn py-2.5 rounded-xl border border-slate-200 font-bold text-slate-700 text-sm hover:border-amber-400">NT$ 5,000</button>
+                            <button type="button" onclick="enableCustomAmount(this)" class="amount-btn py-2.5 rounded-xl border border-slate-200 font-bold text-slate-700 text-sm hover:border-amber-400 col-span-2 sm:col-span-1" data-i18n="amtCustom">自訂金額</button>
+                        </div>
+                        <input type="number" id="custom-amount-input" placeholder="請輸入金額 (如: 10000)" class="hidden w-full px-4 py-2.5 rounded-xl border border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm mt-2">
+                    </div>
+
+                    <!-- Step 3: Interactive Payment Method Selection Tabs -->
+                    <div class="space-y-3">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-500" data-i18n="step3">Step 3：選擇付款方式</label>
+
+                        <!-- Payment Method Tabs -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 border-b border-slate-100 pb-2">
+                            <button type="button" onclick="switchPaymentTab('applepay')" id="tab-applepay" class="pay-tab active py-2.5 px-3 rounded-xl bg-slate-900 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all">
+                                <i class="fa-brands fa-apple text-base"></i> Apple / Google Pay
+                            </button>
+                            <button type="button" onclick="switchPaymentTab('card')" id="tab-card" class="pay-tab py-2.5 px-3 rounded-xl bg-slate-100 text-slate-600 font-semibold text-xs flex items-center justify-center gap-2 hover:bg-slate-200 transition-all">
+                                <i class="fa-regular fa-credit-card text-base"></i> <span data-i18n="payCard">線上信用卡</span>
+                            </button>
+                            <button type="button" onclick="switchPaymentTab('linepay')" id="tab-linepay" class="pay-tab py-2.5 px-3 rounded-xl bg-slate-100 text-slate-600 font-semibold text-xs flex items-center justify-center gap-2 hover:bg-slate-200 transition-all">
+                                <i class="fa-solid fa-qrcode text-base text-emerald-600"></i> LINE Pay / 掃碼
+                            </button>
+                            <button type="button" onclick="switchPaymentTab('bank')" id="tab-bank" class="pay-tab py-2.5 px-3 rounded-xl bg-slate-100 text-slate-600 font-semibold text-xs flex items-center justify-center gap-2 hover:bg-slate-200 transition-all">
+                                <i class="fa-solid fa-building-columns text-base text-blue-600"></i> <span data-i18n="payBank">銀行轉帳</span>
+                            </button>
+                        </div>
+
+                        <!-- Tab Content 1: Apple Pay / Quick Express -->
+                        <div id="pay-content-applepay" class="pay-content p-5 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-4">
+                            <div class="max-w-xs mx-auto space-y-2">
+                                <i class="fa-brands fa-apple text-4xl text-slate-800"></i>
+                                <h4 class="font-bold text-slate-800 text-sm" data-i18n="applePayTitle">快速指紋/面容快捷奉獻</h4>
+                                <p class="text-xs text-slate-500" data-i18n="applePayDesc">無需輸入繁瑣卡號，使用裝置錢包一秒完成安全奉獻。</p>
+                            </div>
+                            <button type="button" onclick="processQuickGiving('Apple Pay / Google Pay')" class="w-full sm:w-auto px-8 py-3 bg-black hover:bg-slate-800 text-white font-bold text-sm rounded-xl transition-all shadow-md inline-flex items-center justify-center gap-2">
+                                <i class="fa-brands fa-apple text-lg"></i> <span data-i18n="btnPayExpress">使用 Pay 快速奉獻</span>
+                            </button>
+                        </div>
+
+                        <!-- Tab Content 2: Credit / Debit Card Gateway -->
+                        <div id="pay-content-card" class="pay-content hidden p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="cardHolder">持卡人姓名</label>
+                                    <input type="text" id="card-name" placeholder="John Doe" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="cardNumber">信用卡卡號</label>
+                                    <div class="relative">
+                                        <input type="text" id="card-number" placeholder="4532 •••• •••• 8899" maxlength="19" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white font-mono">
+                                        <i class="fa-brands fa-cc-visa absolute right-3 top-2.5 text-slate-400 text-lg"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1" data-i18n="cardExp">有效期限 (MM/YY)</label>
+                                    <input type="text" placeholder="12/28" maxlength="5" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">CVC / CVV</label>
+                                    <input type="password" placeholder="•••" maxlength="4" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white font-mono">
+                                </div>
+                            </div>
+                            <button type="button" onclick="processQuickGiving('Credit Card')" class="w-full py-3 bg-church-blue hover:bg-blue-900 text-white font-bold text-sm rounded-xl transition-all shadow">
+                                <i class="fa-solid fa-lock mr-1"></i> <span data-i18n="btnConfirmCard">確認信用卡安全奉獻</span>
+                            </button>
+                        </div>
+
+                        <!-- Tab Content 3: LINE Pay / QR Code Scan -->
+                        <div id="pay-content-linepay" class="pay-content hidden p-5 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-3">
+                            <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">LINE Pay / 電子支付專用</span>
+                            <div class="w-36 h-36 mx-auto bg-white p-2 rounded-xl shadow-inner border border-slate-200 flex items-center justify-center">
+                                <!-- Dynamic QR Code Demo Image -->
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=GraceChurchGiving" alt="Giving QR Code" class="w-full h-full object-contain">
+                            </div>
+                            <p class="text-xs text-slate-500" data-i18n="qrDesc">請開啟 LINE Pay 或相機掃描上方 QR Code 完成付款。</p>
+                            <button type="button" onclick="processQuickGiving('LINE Pay')" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow">
+                                <span data-i18n="btnScanned">我已完成掃碼奉獻</span>
+                            </button>
+                        </div>
+
+                        <!-- Tab Content 4: Bank Wire Transfer -->
+                        <div id="pay-content-bank" class="pay-content hidden p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                            <div class="bg-white p-4 rounded-xl border border-slate-200 text-xs font-mono space-y-2">
+                                <div class="flex justify-between border-b pb-1">
+                                    <span class="text-slate-500 font-sans" data-i18n="bankName">銀行名稱：</span>
+                                    <span class="font-bold text-slate-800">國泰世華銀行 (013)</span>
+                                </div>
+                                <div class="flex justify-between border-b pb-1">
+                                    <span class="text-slate-500 font-sans" data-i18n="bankTitle">戶名：</span>
+                                    <span class="font-bold text-slate-800">財團法人主恩基督教會</span>
+                                </div>
+                                <div class="flex justify-between items-center pt-1">
+                                    <span class="text-slate-500 font-sans" data-i18n="bankAccount">帳號：</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-church-blue text-sm">8824-0012-9988-55</span>
+                                        <button type="button" onclick="copyAccount('8824-0012-9988-55')" class="px-2 py-1 bg-amber-100 text-amber-800 rounded font-sans text-xs">
+                                            <i class="fa-regular fa-copy"></i> <span data-i18n="btnCopy">複製</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" onclick="processQuickGiving('Bank Transfer')" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl transition-all">
+                                <span data-i18n="btnReportWire">我已完成匯款並申報收據</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Donor Details & Tax Receipts Option -->
+                    <div class="space-y-3 pt-2 border-t border-slate-100">
+                        <div class="flex justify-between items-center">
+                            <label class="text-xs font-bold uppercase tracking-wider text-slate-500" data-i18n="step4">Step 4：奉獻者資訊與收據抬頭</label>
+                            <label class="flex items-center gap-1.5 text-xs text-church-blue cursor-pointer font-semibold">
+                                <input type="checkbox" id="tax-receipt-check" checked class="rounded border-slate-300 text-church-blue focus:ring-church-blue">
+                                <span data-i18n="needReceipt">需要開立年度抵稅收據</span>
+                            </label>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <input type="text" id="donor-name" placeholder="奉獻者姓名 / 抬頭 *" required class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                            </div>
+                            <div>
+                                <input type="text" id="donor-id" placeholder="身分證字號 / 統編 (抵稅用)" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Sunday Services Schedule -->
+        <section id="services" class="py-16 bg-white border-y border-slate-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-10">
+                    <span class="text-xs uppercase tracking-widest text-amber-600 font-bold block" data-i18n="servicesSub">SUNDAY WORSHIP</span>
+                    <h2 class="text-3xl font-serif font-bold text-church-heading" data-i18n="servicesTitle">主日聚會時間</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-6 rounded-2xl bg-church-warmbg border border-slate-200/80 space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-church"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-slate-800" data-i18n="serviceChineseTitle">華語主日崇拜</h3>
+                        <p class="text-amber-700 font-bold text-sm">每週日上午 10:00 - 11:30</p>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="serviceChineseDesc">包含敬拜讚美、聖經信息分享與同行禱告。</p>
+                        <span class="inline-block text-[11px] bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full font-medium" data-i18n="locMainHall">地點：2F 主堂</span>
+                    </div>
+
+                    <div class="p-6 rounded-2xl bg-church-warmbg border border-slate-200/80 space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-church-blue flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-globe"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-slate-800" data-i18n="serviceEnglishTitle">英語崇拜 English Service</h3>
+                        <p class="text-church-blue font-bold text-sm">Sundays 11:30 AM - 12:45 PM</p>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="serviceEnglishDesc">Contemporary worship and message in English for youth and international friends.</p>
+                        <span class="inline-block text-[11px] bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full font-medium" data-i18n="locChapel">地點：B1 副堂</span>
+                    </div>
+
+                    <div class="p-6 rounded-2xl bg-church-warmbg border border-slate-200/80 space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-child-reaching"></i>
+                        </div>
+                        <h3 class="font-bold text-lg text-slate-800" data-i18n="serviceKidsTitle">喜樂兒童主日學</h3>
+                        <p class="text-emerald-700 font-bold text-sm">每週日上午 10:00 - 11:30</p>
+                        <p class="text-xs text-slate-600 leading-relaxed" data-i18n="serviceKidsDesc">故事、音樂與品格培育，為幼兒至國小學生預備。</p>
+                        <span class="inline-block text-[11px] bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full font-medium" data-i18n="locKidsBuilding">地點：兒主大樓 1F</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Latest News Announcements Section -->
+        <section id="news" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                    <span class="text-xs uppercase tracking-widest text-amber-600 font-bold block" data-i18n="newsSub">ANNOUNCEMENTS</span>
+                    <h2 class="text-3xl font-serif font-bold text-church-heading" data-i18n="newsTitle">最新消息與週報</h2>
+                </div>
+            </div>
+
+            <div id="public-news-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamically Rendered News Items from State -->
+            </div>
+        </section>
+
+        <!-- Public Footer -->
+        <footer class="bg-slate-900 text-slate-400 text-xs py-10 mt-auto border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 text-center space-y-3">
+                <div class="flex justify-center items-center gap-2 text-white font-serif font-bold text-lg">
+                    <i class="fa-solid fa-cross text-amber-400"></i> 主恩教會 Grace Church
+                </div>
+                <p>© 2026 Grace Church. All rights reserved. 網站全功能與後台管理 Demo。</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- CHURCH ADMIN MANAGEMENT DASHBOARD (後台管理系統) -->
+    <!-- =================================================================== -->
+    <div id="admin-site-container" class="hidden flex-grow flex flex-col md:flex-row bg-slate-100">
+        
+        <!-- Admin Navigation Sidebar -->
+        <aside class="w-full md:w-64 bg-church-sidebar text-slate-300 flex-shrink-0 border-r border-slate-800">
+            <div class="p-5 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-amber-500 text-slate-900 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-church"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white text-sm font-serif" data-i18n="adminPanelTitle">教會後台管理系統</h3>
+                    <span class="text-[11px] text-amber-400 font-mono" data-i18n="adminVer">v2.5 Admin Panel</span>
+                </div>
+            </div>
+
+            <nav class="p-3 space-y-1 text-xs font-medium">
+                <button onclick="switchAdminTab('overview')" id="admin-nav-overview" class="admin-nav-item active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-white bg-church-blue font-bold">
+                    <i class="fa-solid fa-chart-line text-base text-amber-400"></i>
+                    <span data-i18n="adminNavOverview">總覽與數據統計</span>
+                </button>
+
+                <button onclick="switchAdminTab('tithing')" id="admin-nav-tithing" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-coins text-base text-emerald-400"></i>
+                    <span data-i18n="adminNavTithing">奉獻帳務與收據</span>
+                </button>
+
+                <button onclick="switchAdminTab('prayers')" id="admin-nav-prayers" class="admin-nav-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-hands-praying text-base text-sky-400"></i>
+                        <span data-i18n="adminNavPrayers">代禱需求與關懷</span>
+                    </div>
+                    <span class="bg-sky-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">2</span>
+                </button>
+
+                <button onclick="switchAdminTab('cms')" id="admin-nav-cms" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-bullhorn text-base text-amber-400"></i>
+                    <span data-i18n="adminNavCMS">週報與最新消息 CMS</span>
+                </button>
+
+                <button onclick="switchAdminTab('members')" id="admin-nav-members" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition-colors">
+                    <i class="fa-solid fa-users text-base text-purple-400"></i>
+                    <span data-i18n="adminNavMembers">會友與新朋友名冊</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Admin Main Content Area -->
+        <main class="flex-grow p-4 sm:p-8 space-y-6 overflow-y-auto">
+
+            <!-- ADMIN TAB 1: EXECUTIVE OVERVIEW & ANALYTICS -->
+            <div id="admin-tab-overview" class="admin-tab-content space-y-6">
+                <div class="flex flex-wrap justify-between items-center gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800 font-serif" data-i18n="overviewHeading">儀表板總覽 Executive Overview</h1>
+                        <p class="text-xs text-slate-500" data-i18n="overviewSub">即時掌握本月奉獻數據、代禱需求與事工動向</p>
+                    </div>
+                    <button onclick="exportReportCSV()" class="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold shadow-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-csv text-emerald-600"></i> <span data-i18n="btnExportCSV">匯出本月奉獻報表 (.CSV)</span>
+                    </button>
+                </div>
+
+                <!-- 4 Top KPI Stat Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
+                        <span class="text-xs text-slate-500 font-medium" data-i18n="kpiTithing">本月奉獻總額 (NT$)</span>
+                        <div class="text-2xl font-bold text-slate-900 font-mono">NT$ <span id="kpi-total-amount">185,000</span></div>
+                        <span class="inline-block text-[11px] text-emerald-600 font-semibold"><i class="fa-solid fa-arrow-up"></i> +12.5% 較上月成長</span>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
+                        <span class="text-xs text-slate-500 font-medium" data-i18n="kpiCount">奉獻總筆數</span>
+                        <div class="text-2xl font-bold text-slate-900 font-mono" id="kpi-count">48 筆</div>
+                        <span class="inline-block text-[11px] text-slate-500">含 Apple Pay 與信用卡線上支付</span>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
+                        <span class="text-xs text-slate-500 font-medium" data-i18n="kpiPrayers">待處理代禱需求</span>
+                        <div class="text-2xl font-bold text-sky-600 font-mono">3 件</div>
+                        <span class="inline-block text-[11px] text-sky-600 font-semibold">教牧關懷團隊跟進中</span>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-1">
+                        <span class="text-xs text-slate-500 font-medium" data-i18n="kpiNewcomers">本月登記新朋友</span>
+                        <div class="text-2xl font-bold text-amber-600 font-mono">12 人</div>
+                        <span class="inline-block text-[11px] text-amber-600 font-semibold">已派發新朋友迎新小組</span>
+                    </div>
+                </div>
+
+                <!-- Analytics Chart & Recent Transactions -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                        <h3 class="font-bold text-slate-800 text-sm" data-i18n="chartTitle">近半年奉獻趨勢分析 (NT$)</h3>
+                        <div class="h-64 relative">
+                            <canvas id="givingChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                        <h3 class="font-bold text-slate-800 text-sm" data-i18n="recentTithingTitle">最新線上奉獻紀錄</h3>
+                        <div class="space-y-3 max-h-64 overflow-y-auto pr-1" id="recent-transactions-list">
+                            <!-- Dynamically loaded recent logs -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN TAB 2: TITHING TRANSACTION LOGS -->
+            <div id="admin-tab-tithing" class="admin-tab-content hidden space-y-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800 font-serif" data-i18n="tithingHeading">線上奉獻帳務與收據管理</h1>
+                    <p class="text-xs text-slate-500" data-i18n="tithingSub">查看全教會奉獻紀錄、審核入帳狀態與開立年度抵稅收據</p>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-3 justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="tithing-search" placeholder="搜尋奉獻者姓名..." onkeyup="filterTithingTable()" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs bg-white focus:outline-none">
+                        </div>
+                        <span class="text-xs text-slate-500">共 <span id="tithing-count-badge" class="font-bold text-slate-800">5</span> 筆交易</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-700">
+                            <thead class="bg-slate-100 text-slate-600 uppercase font-semibold">
+                                <tr>
+                                    <th class="p-3.5">交易時間</th>
+                                    <th class="p-3.5">奉獻者姓名</th>
+                                    <th class="p-3.5">奉獻項目</th>
+                                    <th class="p-3.5">金額 (NT$)</th>
+                                    <th class="p-3.5">付款管道</th>
+                                    <th class="p-3.5">收據抬頭 / 狀態</th>
+                                    <th class="p-3.5">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-tithing-tbody" class="divide-y divide-slate-100">
+                                <!-- Dynamically populated rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN TAB 3: PRAYER REQUEST CARE MANAGEMENT -->
+            <div id="admin-tab-prayers" class="admin-tab-content hidden space-y-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800 font-serif" data-i18n="prayerHeading">代禱需求與教牧關懷</h1>
+                    <p class="text-xs text-slate-500">弟兄姊妹透過網站提交的代禱事項追蹤</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="admin-prayers-container">
+                    <!-- Dynamic Prayer Cards -->
+                </div>
+            </div>
+
+            <!-- ADMIN TAB 4: NEWS & BULLETIN CMS -->
+            <div id="admin-tab-cms" class="admin-tab-content hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800 font-serif" data-i18n="cmsHeading">週報與最新消息發布 (CMS)</h1>
+                        <p class="text-xs text-slate-500">在此發布的新消息會即時更新至前台網站</p>
+                    </div>
+                    <button onclick="openNewsModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-xl text-xs font-bold shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> <span data-i18n="btnAddNews">新增公告消息</span>
+                    </button>
+                </div>
+
+                <div id="admin-cms-news-list" class="space-y-3">
+                    <!-- Dynamic CMS news list -->
+                </div>
+            </div>
+
+            <!-- ADMIN TAB 5: MEMBERS & NEWCOMERS -->
+            <div id="admin-tab-members" class="admin-tab-content hidden space-y-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800 font-serif" data-i18n="membersHeading">會友與新朋友名冊</h1>
+                    <p class="text-xs text-slate-500">小組歸屬與關懷紀錄管理</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center py-12 space-y-3">
+                    <i class="fa-solid fa-id-card-clip text-4xl text-slate-300"></i>
+                    <p class="text-sm font-semibold text-slate-600">會友資料庫與考勤系統運行中</p>
+                    <p class="text-xs text-slate-400">含 240 位受洗會友及 18 位常態小組長資料。</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- MODAL 1: Public Prayer Request Form Modal -->
+    <div id="prayer-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closePrayerModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden space-y-4">
+                <div class="bg-church-blue p-5 text-white flex justify-between items-center">
+                    <h3 class="font-bold text-lg font-serif"><i class="fa-solid fa-hands-praying text-amber-300 mr-2"></i>提出代禱需求</h3>
+                    <button onclick="closePrayerModal()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <form onsubmit="handlePrayerSubmit(event)" class="p-6 space-y-4 text-xs">
+                    <div>
+                        <label class="block font-semibold mb-1">您的姓名 / 稱呼 *</label>
+                        <input type="text" id="pray-name" required placeholder="如：張弟兄" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">聯絡電話 / Email *</label>
+                        <input type="text" id="pray-contact" required placeholder="0912-345-678" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">代禱內容 *</label>
+                        <textarea id="pray-content" rows="3" required placeholder="請簡單敘述需要我們為您同心禱告的事項..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-xl text-sm shadow">送出代禱需求</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Downloadable Tithing Receipt Modal -->
+    <div id="receipt-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeReceiptModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 space-y-6 border border-amber-200">
+                <div class="text-center space-y-1">
+                    <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mx-auto">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-serif text-slate-800" data-i18n="receiptSuccessTitle">奉獻成功！神賜福予您</h3>
+                    <p class="text-xs text-slate-500" data-i18n="receiptSuccessSub">電子奉獻收據已生成，感謝您的忠心支持</p>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs font-mono">
+                    <div class="flex justify-between"><span class="text-slate-500">收據單號：</span><span id="rec-id" class="font-bold">GR-20261002-01</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">奉獻日期：</span><span id="rec-date">2026-10-02</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">奉獻者：</span><span id="rec-name" class="font-bold">王大明</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">奉獻項目：</span><span id="rec-cat">十一奉獻</span></div>
+                    <div class="flex justify-between"><span class="text-slate-500">付款管道：</span><span id="rec-method">Apple Pay</span></div>
+                    <div class="flex justify-between pt-2 border-t text-sm font-bold text-slate-900"><span class="font-sans">奉獻總額：</span><span class="text-emerald-600" id="rec-amount">NT$ 3,000</span></div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button onclick="closeReceiptModal()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl">關閉窗口</button>
+                    <button onclick="closeReceiptModal(); showToast('收據電子檔下載完成！', 'fa-file-arrow-down', 'text-amber-400')" class="w-1/2 py-2.5 bg-church-blue hover:bg-blue-900 text-white font-bold text-xs rounded-xl shadow">下載電子收據 PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Admin Add News Modal -->
+    <div id="cms-news-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeNewsModal()"></div>
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 space-y-4">
+                <h3 class="font-bold text-lg text-slate-800 font-serif">發布最新消息 / 週報公告</h3>
+                <form onsubmit="handleCmsNewsSubmit(event)" class="space-y-3 text-xs">
+                    <div>
+                        <label class="block font-semibold mb-1">公告標題 *</label>
+                        <input type="text" id="cms-news-title" required placeholder="如：2026 秋季培靈大會特刊" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm">
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">公告類別</label>
+                        <select id="cms-news-category" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+                            <option>教會公告</option>
+                            <option>培靈特會</option>
+                            <option>團契活動</option>
+                            <option>主日週報</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold mb-1">詳細內容 *</label>
+                        <textarea id="cms-news-content" rows="4" required placeholder="請輸入詳細內容說明..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"></textarea>
+                    </div>
+                    <div class="flex gap-2 pt-2">
+                        <button type="button" onclick="closeNewsModal()" class="w-1/2 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold">取消</button>
+                        <button type="submit" class="w-1/2 py-2.5 bg-amber-500 text-slate-900 rounded-xl font-bold">即時發布至前台</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-box" class="fixed bottom-6 right-6 z-50 hidden bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-700">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-xl" id="toast-icon"></i>
+        <span id="toast-text" class="text-xs sm:text-sm font-medium">通知訊息</span>
+    </div>
+
+    <!-- JavaScript Application State and Logic -->
+    <script>
+        // Dictionary for Multilingual Translations
+        const i18n = {
+            'zh': {
+                demoModeTag: 'DEMO 系統展示中',
+                demoWelcome: '歡迎體驗主恩教會網站全功能與後台管理系統',
+                modePublic: '前台官網',
+                modeAdmin: '後台管理系統',
+                churchName: '主恩教會',
+                churchSubName: 'Grace Church',
+                navHome: '主頁',
+                navServices: '主日崇拜',
+                navGiving: '線上奉獻',
+                navPrayer: '代禱需求',
+                navNews: '最新消息',
+                navGroups: '團契小組',
+                btnPrayer: '提出代禱',
+                btnGiveNow: '線上奉獻支持',
+                heroLiveTag: '主日崇拜直播與實體聚會歡迎您',
+                heroTitle1: '遇見基督愛與真理',
+                heroTitle2: '建立溫暖喜樂的屬靈家園',
+                heroDesc: '無論您處於生命的何種階段，主恩教會都誠摯歡迎您。邀請您與我們一同敬拜，分享神的愛與盼望。',
+                heroNextService: '距離本週主日崇拜倒數',
+                unitDays: '天', unitHours: '時', unitMins: '分', unitSecs: '秒',
+                btnServiceTimes: '聚會時間與地點',
+                givingSub: 'ONLINE TITHING & OFFERING',
+                givingTitle: '線上奉獻專區',
+                givingDesc: '「各人要隨本心所酌定的，不要作難，不要勉強，因為捐得樂意的人是神所喜愛的。」（林後 9:7）',
+                step1: 'Step 1：選擇奉獻項目',
+                catTithe: '十一奉獻', catBuilding: '建堂基金', catMissions: '宣教宣道', catMercy: '慈惠救助',
+                step2: 'Step 2：選擇或輸入金額 (NT$)',
+                amtCustom: '自訂金額',
+                step3: 'Step 3：選擇付款方式',
+                payCard: '線上信用卡', payBank: '銀行轉帳',
+                applePayTitle: '快速指紋/面容快捷奉獻',
+                applePayDesc: '無需輸入繁瑣卡號，使用裝置錢包一秒完成安全奉獻。',
+                btnPayExpress: '使用 Pay 快速奉獻',
+                cardHolder: '持卡人姓名', cardNumber: '信用卡卡號', cardExp: '有效期限 (MM/YY)',
+                btnConfirmCard: '確認信用卡安全奉獻',
+                qrDesc: '請開啟 LINE Pay 或相機掃描上方 QR Code 完成付款。',
+                btnScanned: '我已完成掃碼奉獻',
+                bankName: '銀行名稱：', bankTitle: '戶名：', bankAccount: '帳號：', btnCopy: '複製',
+                btnReportWire: '我已完成匯款並申報收據',
+                step4: 'Step 4：奉獻者資訊與收據抬頭',
+                needReceipt: '需要開立年度抵稅收據',
+                servicesSub: 'SUNDAY WORSHIP', servicesTitle: '主日聚會時間',
+                serviceChineseTitle: '華語主日崇拜', serviceChineseDesc: '包含敬拜讚美、聖經信息分享與同行禱告。', locMainHall: '地點：2F 主堂',
+                serviceEnglishTitle: '英語崇拜 English Service', serviceEnglishDesc: 'Contemporary worship and message in English for youth and international friends.', locChapel: '地點：B1 副堂',
+                serviceKidsTitle: '喜樂兒童主日學', serviceKidsDesc: '故事、音樂與品格培育，為幼兒至國小學生預備。', locKidsBuilding: '地點：兒主大樓 1F',
+                newsSub: 'ANNOUNCEMENTS', newsTitle: '最新消息與週報',
+                adminPanelTitle: '教會後台管理系統', adminVer: 'v2.5 Admin Panel',
+                adminNavOverview: '總覽與數據統計', adminNavTithing: '奉獻帳務與收據', adminNavPrayers: '代禱需求與關懷', adminNavCMS: '週報與最新消息 CMS', adminNavMembers: '會友與新朋友名冊',
+                overviewHeading: '儀表板總覽 Executive Overview', overviewSub: '即時掌握本月奉獻數據、代禱需求與事工動向',
+                btnExportCSV: '匯出本月奉獻報表 (.CSV)',
+                kpiTithing: '本月奉獻總額 (NT$)', kpiCount: '奉獻總筆數', kpiPrayers: '待處理代禱需求', kpiNewcomers: '本月登記新朋友',
+                chartTitle: '近半年奉獻趨勢分析 (NT$)', recentTithingTitle: '最新線上奉獻紀錄',
+                tithingHeading: '線上奉獻帳務與收據管理', tithingSub: '查看全教會奉獻紀錄、審核入帳狀態與開立年度抵稅收據',
+                prayerHeading: '代禱需求與教牧關懷', cmsHeading: '週報與最新消息發布 (CMS)', btnAddNews: '新增公告消息', membersHeading: '會友與新朋友名冊',
+                receiptSuccessTitle: '奉獻成功！神賜福予您', receiptSuccessSub: '電子奉獻收據已生成，感謝您的忠心支持'
+            },
+            'en': {
+                demoModeTag: 'DEMO SYSTEM LIVE',
+                demoWelcome: 'Welcome to Grace Church Full Feature & Admin System Demo',
+                modePublic: 'Public Site',
+                modeAdmin: 'Admin Panel',
+                churchName: 'Grace Church',
+                churchSubName: 'Grace Church',
+                navHome: 'Home',
+                navServices: 'Services',
+                navGiving: 'Online Giving',
+                navPrayer: 'Prayer Request',
+                navNews: 'News & Bulletin',
+                navGroups: 'Ministries',
+                btnPrayer: 'Request Prayer',
+                btnGiveNow: 'Give Online',
+                heroLiveTag: 'Welcome to Sunday Live Stream & Sanctuary Worship',
+                heroTitle1: 'Encounter Christ’s Love & Truth',
+                heroTitle2: 'Building a Warm Spiritual Home Together',
+                heroDesc: 'No matter what season of life you are in, Grace Church warmly welcomes you to worship with us.',
+                heroNextService: 'Countdown to Sunday Worship',
+                unitDays: 'd', unitHours: 'h', unitMins: 'm', unitSecs: 's',
+                btnServiceTimes: 'Service Times & Location',
+                givingSub: 'ONLINE TITHING & OFFERING',
+                givingTitle: 'Online Giving & Tithing',
+                givingDesc: '“Each of you should give what you have decided in your heart to give, not reluctantly or under compulsion, for God loves a cheerful giver.” (2 Cor 9:7)',
+                step1: 'Step 1: Select Giving Category',
+                catTithe: 'General Tithe', catBuilding: 'Building Fund', catMissions: 'Missions Fund', catMercy: 'Mercy & Care',
+                step2: 'Step 2: Select Amount (NT$)',
+                amtCustom: 'Custom Amount',
+                step3: 'Step 3: Select Payment Method',
+                payCard: 'Credit Card', payBank: 'Wire Transfer',
+                applePayTitle: 'Express One-Touch Giving',
+                applePayDesc: 'Give seamlessly in seconds with Apple/Google Pay device authentication.',
+                btnPayExpress: 'Pay Express',
+                cardHolder: 'Cardholder Name', cardNumber: 'Credit Card Number', cardExp: 'Expires (MM/YY)',
+                btnConfirmCard: 'Confirm Secure Tithing',
+                qrDesc: 'Scan the QR Code above using LINE Pay or Mobile Camera.',
+                btnScanned: 'I Have Completed QR Payment',
+                bankName: 'Bank:', bankTitle: 'Title:', bankAccount: 'Account:', btnCopy: 'Copy',
+                btnReportWire: 'I Have Transferred & Request Receipt',
+                step4: 'Step 4: Donor Details & Tax Receipts',
+                needReceipt: 'Require Tax-Deductible Receipt',
+                servicesSub: 'SUNDAY WORSHIP', servicesTitle: 'Worship Schedule',
+                serviceChineseTitle: 'Mandarin Worship Service', serviceChineseDesc: 'Praise worship, biblical teaching, and fellowship prayer.', locMainHall: 'Loc: 2F Main Sanctuary',
+                serviceEnglishTitle: 'English Service', serviceEnglishDesc: 'Contemporary worship and message in English for youth and international friends.', locChapel: 'Loc: B1 Chapel',
+                serviceKidsTitle: 'Children Sunday School', serviceKidsDesc: 'Bible stories, music, and character building for kids.', locKidsBuilding: 'Loc: Kids Bldg 1F',
+                newsSub: 'ANNOUNCEMENTS', newsTitle: 'News & Sunday Bulletin',
+                adminPanelTitle: 'Church Admin System', adminVer: 'v2.5 Admin Panel',
+                adminNavOverview: 'Executive Overview', adminNavTithing: 'Giving & Receipts', adminNavPrayers: 'Prayer Care', adminNavCMS: 'Bulletin CMS', adminNavMembers: 'Member Directory',
+                overviewHeading: 'Executive Overview', overviewSub: 'Real-time metrics on tithing, prayer requests, and ministries',
+                btnExportCSV: 'Export Monthly Report (.CSV)',
+                kpiTithing: 'Monthly Tithing (NT$)', kpiCount: 'Transaction Count', kpiPrayers: 'Pending Prayer Requests', kpiNewcomers: 'Newcomers This Month',
+                chartTitle: '6-Month Tithing Trend (NT$)', recentTithingTitle: 'Recent Online Giving Activity',
+                tithingHeading: 'Tithing Accounts & Receipt Control', tithingSub: 'Verify incoming funds, review transactions, and issue tax receipts',
+                prayerHeading: 'Prayer Care Requests', cmsHeading: 'Bulletin CMS Publisher', btnAddNews: 'Publish New Announcement', membersHeading: 'Member Directory',
+                receiptSuccessTitle: 'Giving Successful! God Bless You', receiptSuccessSub: 'Your digital receipt has been generated.'
+            }
+        };
+
+        // Application State Data
+        let currentLang = 'zh';
+        let currentCategory = '十一奉獻';
+        let currentAmount = 1000;
+        let currentPaymentMethod = 'Apple Pay';
+
+        let transactionsState = [
+            { id: 'GR-20261002-01', date: '2026-10-02 14:22', name: '王大明', category: '十一奉獻', amount: 3000, method: 'Apple Pay', status: '已入帳' },
+            { id: 'GR-20261002-02', date: '2026-10-02 11:05', name: '陳雅婷', category: '建堂基金', amount: 10000, method: 'Credit Card', status: '已入帳' },
+            { id: 'GR-20261001-03', date: '2026-10-01 09:15', name: 'John Smith', category: '宣教宣道', amount: 5000, method: 'LINE Pay', status: '已入帳' },
+            { id: 'GR-20260930-04', date: '2026-09-30 20:40', name: '李國強', category: '十一奉獻', amount: 2000, method: 'Bank Transfer', status: '審核中' },
+            { id: 'GR-20260928-05', date: '2026-09-28 16:30', name: '林美玲', category: '慈惠救助', amount: 1500, method: 'Apple Pay', status: '已入帳' }
+        ];
+
+        let prayerState = [
+            { id: 1, name: '張姊妹', contact: '0933-xxx-123', content: '為家母近期安排的手術禱告，求神賜下平安與順利的醫治過程。', status: '待關懷', date: '2026-10-02' },
+            { id: 2, name: 'David Lee', contact: 'david@demo.com', content: 'Pray for guidance for my upcoming job interview and family decision.', status: '待關懷', date: '2026-10-01' },
+            { id: 3, name: '黃弟兄', contact: '0912-xxx-888', content: '感謝主，上週小組同工為我的事業同心禱告，狀況已逐漸好轉！', status: '已代禱', date: '2026-09-29' }
+        ];
+
+        let newsState = [
+            { id: 1, title: '2026 秋季全教會培靈大會 - 「在動盪中堅固信仰」', date: '2026-11-15', category: '培靈特會', content: '邀請特別講員張理查牧師蒞臨，備有同步翻譯與兒童照顧，歡迎弟兄姊妹預留時間參加。' },
+            { id: 2, title: '感恩節新朋友愛宴聚會邀請', date: '2026-11-22', category: '團契活動', content: '歡迎近三個月首次來到主恩教會的新朋友，備有豐盛美食與溫暖分享。' },
+            { id: 3, title: '主恩教會 10 月份第 1 週主日週報', date: '2026-10-04', category: '主日週報', content: '本週講員：張約翰牧師，講題：「活出甘心樂意的生命」。' }
+        ];
+
+        // Language Switcher Function
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            document.getElementById('lang-label').textContent = currentLang === 'zh' ? 'English' : '繁體中文';
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[currentLang][key]) {
+                    el.textContent = i18n[currentLang][key];
+                }
+            });
+        }
+
+        // View Mode Switcher (Public vs Admin Panel)
+        function switchViewMode(mode) {
+            const publicContainer = document.getElementById('public-site-container');
+            const adminContainer = document.getElementById('admin-site-container');
+            const btnPublic = document.getElementById('mode-public-btn');
+            const btnAdmin = document.getElementById('mode-admin-btn');
+
+            if (mode === 'public') {
+                publicContainer.classList.remove('hidden');
+                adminContainer.classList.add('hidden');
+                btnPublic.className = "px-3 py-1 rounded-md text-xs font-semibold bg-church-blue text-white shadow-sm flex items-center gap-1";
+                btnAdmin.className = "px-3 py-1 rounded-md text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1";
+            } else {
+                publicContainer.classList.add('hidden');
+                adminContainer.classList.remove('hidden');
+                btnAdmin.className = "px-3 py-1 rounded-md text-xs font-semibold bg-amber-500 text-slate-900 shadow-sm flex items-center gap-1 font-bold";
+                btnPublic.className = "px-3 py-1 rounded-md text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1";
+                renderChart();
+            }
+        }
+
+        // Mobile Nav Toggle
+        function toggleMobileNav() {
+            document.getElementById('mobile-nav').classList.toggle('hidden');
+        }
+
+        // Interactive Giving Options Helpers
+        function selectCategory(btn, categoryName) {
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                b.className = "cat-btn py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-300 text-slate-600 font-bold text-xs sm:text-sm text-center transition-all";
+            });
+            btn.className = "cat-btn active py-3 px-4 rounded-xl border border-church-blue bg-church-softblue text-church-blue font-bold text-xs sm:text-sm text-center transition-all";
+            currentCategory = categoryName;
+        }
+
+        function selectAmount(amt, btn) {
+            document.getElementById('custom-amount-input').classList.add('hidden');
+            document.querySelectorAll('.amount-btn').forEach(b => {
+                b.className = "amount-btn py-2.5 rounded-xl border border-slate-200 font-bold text-slate-700 text-sm hover:border-amber-400";
+            });
+            btn.className = "amount-btn active py-2.5 rounded-xl border-2 border-amber-500 bg-amber-50 font-bold text-amber-800 text-sm";
+            currentAmount = amt;
+        }
+
+        function enableCustomAmount(btn) {
+            const input = document.getElementById('custom-amount-input');
+            input.classList.remove('hidden');
+            input.focus();
+            document.querySelectorAll('.amount-btn').forEach(b => {
+                b.className = "amount-btn py-2.5 rounded-xl border border-slate-200 font-bold text-slate-700 text-sm hover:border-amber-400";
+            });
+            btn.className = "amount-btn active py-2.5 rounded-xl border-2 border-amber-500 bg-amber-50 font-bold text-amber-800 text-sm";
+        }
+
+        function switchPaymentTab(tabName) {
+            document.querySelectorAll('.pay-tab').forEach(t => {
+                t.className = "pay-tab py-2.5 px-3 rounded-xl bg-slate-100 text-slate-600 font-semibold text-xs flex items-center justify-center gap-2 hover:bg-slate-200 transition-all";
+            });
+            document.querySelectorAll('.pay-content').forEach(c => c.classList.add('hidden'));
+
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            const activeContent = document.getElementById(`pay-content-${tabName}`);
+
+            activeTab.className = "pay-tab active py-2.5 px-3 rounded-xl bg-slate-900 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all";
+            activeContent.classList.remove('hidden');
+
+            const methodNames = { applepay: 'Apple Pay', card: 'Credit Card', linepay: 'LINE Pay', bank: 'Bank Transfer' };
+            currentPaymentMethod = methodNames[tabName];
+        }
+
+        // Handle Quick Giving Process & Dynamic Receipt Generation
+        function processQuickGiving(methodName) {
+            const donorNameInput = document.getElementById('donor-name').value.trim() || '無名氏弟兄/姊妹';
+            const customAmt = document.getElementById('custom-amount-input').value;
+            const finalAmt = customAmt ? parseInt(customAmt) : currentAmount;
+
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0, 10);
+            const timeStr = `${dateStr} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+            const transactionId = `GR-${dateStr.replace(/-/g,'')}-${Math.floor(100+Math.random()*900)}`;
+
+            // Create new transaction log in state
+            const newLog = {
+                id: transactionId,
+                date: timeStr,
+                name: donorNameInput,
+                category: currentCategory,
+                amount: finalAmt,
+                method: methodName,
+                status: '已入帳'
+            };
+
+            transactionsState.unshift(newLog);
+            renderAdminData();
+
+            // Populate Modal Receipt
+            document.getElementById('rec-id').textContent = transactionId;
+            document.getElementById('rec-date').textContent = dateStr;
+            document.getElementById('rec-name').textContent = donorNameInput;
+            document.getElementById('rec-cat').textContent = currentCategory;
+            document.getElementById('rec-method').textContent = methodName;
+            document.getElementById('rec-amount').textContent = `NT$ ${finalAmt.toLocaleString()}`;
+
+            // Show Receipt Modal
+            document.getElementById('receipt-modal').classList.remove('hidden');
+        }
+
+        // Copy Bank Account
+        function copyAccount(acc) {
+            const temp = document.createElement("input");
+            temp.value = acc;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand("copy");
+            document.body.removeChild(temp);
+            showToast("銀行帳號已複製到剪貼簿！", "fa-circle-check", "text-emerald-400");
+        }
+
+        // Admin Navigation Tabs Switcher
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-nav-item').forEach(btn => {
+                btn.className = "admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-slate-800 hover:text-white transition-colors text-slate-300";
+            });
+            document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.add('hidden'));
+
+            document.getElementById(`admin-nav-${tab}`).className = "admin-nav-item active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-white bg-church-blue font-bold shadow-sm";
+            document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
+
+            if (tab === 'overview') renderChart();
+        }
+
+        // Render Public News List
+        function renderPublicNews() {
+            const container = document.getElementById('public-news-list');
+            container.innerHTML = newsState.map(item => `
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 font-bold">${item.category}</span>
+                        <span class="text-slate-400 font-mono">${item.date}</span>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-base leading-snug">${item.title}</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">${item.content}</p>
+                </div>
+            `).join('');
+        }
+
+        // Render Admin CMS News List
+        function renderCmsNews() {
+            const container = document.getElementById('admin-cms-news-list');
+            container.innerHTML = newsState.map(item => `
+                <div class="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-slate-800">${item.title}</span>
+                            <span class="px-2 py-0.2 bg-slate-100 text-slate-600 rounded text-[10px]">${item.category}</span>
+                        </div>
+                        <p class="text-slate-500 font-mono text-[11px]">${item.date}</p>
+                    </div>
+                    <button onclick="deleteNews(${item.id})" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function deleteNews(id) {
+            newsState = newsState.filter(n => n.id !== id);
+            renderPublicNews();
+            renderCmsNews();
+            showToast("公告已移除", "fa-trash-can", "text-red-400");
+        }
+
+        // Render Admin Tithing Logs & Dashboard
+        function renderAdminData() {
+            // Render Tithing Table
+            const tbody = document.getElementById('admin-tithing-tbody');
+            tbody.innerHTML = transactionsState.map(t => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="p-3.5 font-mono text-slate-500">${t.date}</td>
+                    <td class="p-3.5 font-bold text-slate-800">${t.name}</td>
+                    <td class="p-3.5"><span class="px-2 py-0.5 rounded bg-blue-50 text-church-blue font-semibold text-[11px]">${t.category}</span></td>
+                    <td class="p-3.5 font-bold font-mono text-emerald-600">NT$ ${t.amount.toLocaleString()}</td>
+                    <td class="p-3.5">${t.method}</td>
+                    <td class="p-3.5"><span class="px-2 py-0.5 rounded-full ${t.status === '已入帳' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} font-bold text-[10px]">${t.status}</span></td>
+                    <td class="p-3.5">
+                        <button onclick="showToast('正開立交易 ${t.id} 電子收據...', 'fa-file-invoice', 'text-sky-400')" class="text-church-blue hover:underline font-semibold">開立收據</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('tithing-count-badge').textContent = transactionsState.length;
+
+            // Render Overview Recent List
+            const recentContainer = document.getElementById('recent-transactions-list');
+            recentContainer.innerHTML = transactionsState.slice(0, 5).map(t => `
+                <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-xl text-xs">
+                    <div>
+                        <span class="font-bold text-slate-800 block">${t.name} (${t.category})</span>
+                        <span class="text-[10px] text-slate-400">${t.method} • ${t.date}</span>
+                    </div>
+                    <span class="font-bold font-mono text-emerald-600">+NT$ ${t.amount.toLocaleString()}</span>
+                </div>
+            `).join('');
+
+            // Update KPI totals
+            const totalSum = transactionsState.reduce((sum, t) => sum + t.amount, 0);
+            document.getElementById('kpi-total-amount').textContent = totalSum.toLocaleString();
+            document.getElementById('kpi-count').textContent = `${transactionsState.length} 筆`;
+
+            // Render Prayers List
+            const prayerContainer = document.getElementById('admin-prayers-container');
+            prayerContainer.innerHTML = prayerState.map(p => `
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-800">${p.name} <span class="text-slate-400 font-normal">(${p.contact})</span></span>
+                        <span class="px-2 py-0.5 rounded-full ${p.status === '待關懷' ? 'bg-sky-100 text-sky-800' : 'bg-slate-100 text-slate-600'} font-bold text-[10px]">${p.status}</span>
+                    </div>
+                    <p class="text-xs text-slate-600 leading-relaxed">${p.content}</p>
+                    <div class="pt-2 border-t flex justify-between items-center text-[11px]">
+                        <span class="text-slate-400">${p.date}</span>
+                        ${p.status === '待關懷' ? `<button onclick="markPrayerDone(${p.id})" class="px-3 py-1 bg-sky-500 hover:bg-sky-600 text-white rounded-lg font-bold">標記已關懷代禱</button>` : `<span class="text-emerald-600 font-semibold"><i class="fa-solid fa-check mr-1"></i>已關懷</span>`}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function markPrayerDone(id) {
+            prayerState = prayerState.map(p => p.id === id ? { ...p, status: '已代禱' } : p);
+            renderAdminData();
+            showToast("已更新為已關懷代禱狀態", "fa-check", "text-emerald-400");
+        }
+
+        // CSV Export Helper
+        function exportReportCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Transaction ID,Date,Donor Name,Category,Amount NT,Method,Status\n";
+            transactionsState.forEach(t => {
+                csvContent += `${t.id},${t.date},${t.name},${t.category},${t.amount},${t.method},${t.status}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "GraceChurch_Tithing_Report_2026.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("CSV 財務報表已開始下載！", "fa-file-csv", "text-emerald-400");
+        }
+
+        // Modal Handlers
+        function openPrayerModal() { document.getElementById('prayer-modal').classList.remove('hidden'); }
+        function closePrayerModal() { document.getElementById('prayer-modal').classList.add('hidden'); }
+        function closeReceiptModal() { document.getElementById('receipt-modal').classList.add('hidden'); }
+        function openNewsModal() { document.getElementById('cms-news-modal').classList.remove('hidden'); }
+        function closeNewsModal() { document.getElementById('cms-news-modal').classList.add('hidden'); }
+
+        function handlePrayerSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('pray-name').value;
+            const contact = document.getElementById('pray-contact').value;
+            const content = document.getElementById('pray-content').value;
+
+            prayerState.unshift({
+                id: Date.now(),
+                name: name,
+                contact: contact,
+                content: content,
+                status: '待關懷',
+                date: new Date().toISOString().slice(0, 10)
+            });
+
+            closePrayerModal();
+            renderAdminData();
+            showToast("代禱需求已順利送出，關懷團隊將為您禱告！", "fa-hands-praying", "text-amber-300");
+            e.target.reset();
+        }
+
+        function handleCmsNewsSubmit(e) {
+            e.preventDefault();
+            const title = document.getElementById('cms-news-title').value;
+            const category = document.getElementById('cms-news-category').value;
+            const content = document.getElementById('cms-news-content').value;
+
+            newsState.unshift({
+                id: Date.now(),
+                title: title,
+                category: category,
+                content: content,
+                date: new Date().toISOString().slice(0, 10)
+            });
+
+            closeNewsModal();
+            renderPublicNews();
+            renderCmsNews();
+            showToast("最新消息已即時發布至前台！", "fa-bullhorn", "text-amber-400");
+            e.target.reset();
+        }
+
+        function showToast(msg, icon = "fa-circle-check", color = "text-emerald-400") {
+            const toast = document.getElementById('toast-box');
+            document.getElementById('toast-text').textContent = msg;
+            document.getElementById('toast-icon').className = `fa-solid ${icon} ${color} text-xl`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3500);
+        }
+
+        // Chart.js Chart Initialization
+        let givingChartInstance = null;
+        function renderChart() {
+            const ctx = document.getElementById('givingChart');
+            if (!ctx) return;
+
+            if (givingChartInstance) {
+                givingChartInstance.destroy();
+            }
+
+            givingChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['5月', '6月', '7月', '8月', '9月', '10月 (本月)'],
+                    datasets: [{
+                        label: '奉獻總額 (NT$)',
+                        data: [142000, 158000, 135000, 162000, 170000, 185000],
+                        borderColor: '#1E3A8A',
+                        backgroundColor: 'rgba(30, 58, 138, 0.08)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // Countdown Timer Logic for Sunday Service
+        function startSundayTimer() {
+            let seconds = 92120;
+            setInterval(() => {
+                seconds--;
+                if (seconds < 0) seconds = 92120;
+                const d = Math.floor(seconds / (3600*24));
+                const h = Math.floor((seconds % (3600*24)) / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                const s = Math.floor(seconds % 60);
+
+                document.getElementById('timer-days').textContent = d.toString().padStart(2, '0');
+                document.getElementById('timer-hours').textContent = h.toString().padStart(2, '0');
+                document.getElementById('timer-mins').textContent = m.toString().padStart(2, '0');
+                document.getElementById('timer-secs').textContent = s.toString().padStart(2, '0');
+            }, 1000);
+        }
+
+        // Initialize App on Window Load
+        window.onload = function() {
+            renderPublicNews();
+            renderCmsNews();
+            renderAdminData();
+            startSundayTimer();
+        }
+    </script>
+</body>
+</html>
